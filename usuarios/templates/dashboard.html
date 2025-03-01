@@ -1,0 +1,164 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #dff0d8;
+            border: 1px solid #d6e9c6;
+            color: #3c763d;
+            border-radius: 4px;
+            display: none;
+        }
+        .navbar {
+            background-color: #333;
+            overflow: hidden;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .user-info {
+            margin-right: 20px;
+        }
+        .logout-btn {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2>Panel de Control</h2>
+        <div class="user-info">
+            Hola, {{ usuario }} ({{ tipo_usuario }}) |
+            {% comment %} <a href="{% url 'logout' %}"><button class="logout-btn">Cerrar Sesión</button></a> {% endcomment %}
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Bienvenido, {{ usuario }}</h1>
+        <p>Correo: {{ email }}</p>
+
+        <div id="message" class="message"></div>
+
+        {% if tipo_usuario == 'admin' %}
+            <h2>Lista de Usuarios</h2>
+            <table>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Email</th>
+                    <th>Acciones</th>
+                </tr>
+                {% for user in usuarios %}
+                <tr id="row_{{ user.usuario }}">
+                    <td><input type="text" id="usuario_{{ user.usuario }}" value="{{ user.usuario }}"></td>
+                    <td><input type="text" id="email_{{ user.usuario }}" value="{{ user.email }}"></td>
+                    <td>
+                        <button onclick="updateUser('{{ user.usuario }}')">Guardar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>No tienes permisos para administrar usuarios.</p>
+        {% endif %}
+    </div>
+
+    {% if tipo_usuario == 'admin' %}
+    <script>
+        function updateUser(oldUsuario) {
+            // Obtener los valores actualizados
+            const nuevoUsuario = document.getElementById('usuario_' + oldUsuario).value;
+            const nuevoEmail = document.getElementById('email_' + oldUsuario).value;
+
+            // Obtener los modos actuales del usuario desde el backend
+            // para no perderlos al actualizar
+
+            // Crear el objeto de datos
+            const data = {
+                oldUsuario: oldUsuario,
+                usuario: nuevoUsuario,
+                email: nuevoEmail
+            };
+
+            // Enviar la solicitud AJAX
+            fetch('{% url 'update_user' %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                const messageElement = document.getElementById('message');
+                messageElement.style.display = 'block';
+
+                if (data.message) {
+                    messageElement.textContent = data.message;
+                    messageElement.style.backgroundColor = '#dff0d8';
+                    messageElement.style.color = '#3c763d';
+
+                    // Actualizar el ID de la fila si el nombre de usuario cambió
+                    if (oldUsuario !== nuevoUsuario) {
+                        const row = document.getElementById('row_' + oldUsuario);
+                        row.id = 'row_' + nuevoUsuario;
+
+                        // Actualizar los IDs de los inputs
+                        document.getElementById('usuario_' + oldUsuario).id = 'usuario_' + nuevoUsuario;
+                        document.getElementById('email_' + oldUsuario).id = 'email_' + nuevoUsuario;
+                    }
+                } else if (data.error) {
+                    messageElement.textContent = 'Error: ' + data.error;
+                    messageElement.style.backgroundColor = '#f2dede';
+                    messageElement.style.color = '#a94442';
+                }
+
+                // Ocultar el mensaje después de 3 segundos
+                setTimeout(() => {
+                    messageElement.style.display = 'none';
+                }, 3000);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('message').textContent = 'Error al actualizar el usuario.';
+                document.getElementById('message').style.display = 'block';
+                document.getElementById('message').style.backgroundColor = '#f2dede';
+                document.getElementById('message').style.color = '#a94442';
+            });
+        }
+    </script>
+    {% endif %}
+</body>
+</html>

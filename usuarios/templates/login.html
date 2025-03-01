@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+</head>
+
+<body>
+    <div class="contenedor-formulario">
+        <div class="contenedor-logo">
+            <img src="{% static 'imgs/spider-white.png' %}" alt="Logo" class="logo" />
+            <h1>Login</h1>
+        </div>
+
+        <form action="{% url 'mlogin' %}" method="POST">
+            {% csrf_token %}
+            <div class="grupo-entrada">
+                <label for="username">Username:</label>
+                <input type="text" name="username" id="username" placeholder="admin123" required />
+            </div>
+
+            <div class="grupo-entrada">
+                <label for="password">Password:</label>
+                <input type="password" name="password" id="password" placeholder="****" required />
+            </div>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <p>¿No tienes una cuenta? <a href="{% url 'register' %}">Regístrate aquí</a></p>
+    </div>
+</body>
+</html>

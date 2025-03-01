@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registrarse</title>
+    <link rel="stylesheet" href="{% static 'styleregister.css' %}" />
+</head>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form");
+        form.addEventListener("submit", function (event) {
+            const password1 = document.getElementById("pswd").value;
+            const password2 = document.getElementById("pswd2").value;
+
+            if (password1 !== password2) {
+                event.preventDefault();
+                alert("Las contraseñas no coinciden. Inténtalo de nuevo.");
+            }
+        });
+    });
+</script>
+
+<body>
+    <div class="contenedor-formulario">
+        <div class="contenedor-logo">
+            <img src="{% static 'imgs/spider-white.png' %}" alt="Logo" class="logo" />
+            <h1>REGISTRARSE</h1>
+        </div>
+
+        <form action="{% url 'mregister' %}" method="POST">
+            {% csrf_token %}
+            <div class="grupo-entrada">
+                <label for="usr">Usuario</label>
+                <input type="text" name="username" id="usr" placeholder="admin123" required />
+            </div>
+
+            <div class="grupo-entrada">
+                <label for="email">Correo Electrónico</label>
+                <input type="email" name="email" id="email" placeholder="correo@ejemplo.com" required />
+            </div>
+
+            <div class="grupo-entrada">
+                <label for="pswd">Contraseña</label>
+                <input type="password" name="password1" id="pswd" placeholder="****" required />
+            </div>
+
+            <div class="grupo-entrada">
+                <label for="pswd2">Confirmar Contraseña</label>
+                <input type="password" name="password2" id="pswd2" placeholder="****" required />
+            </div>
+
+            <button type="submit">Registrarse</button>
+        </form>
+        <div id="response"></div>
+        <p>¿Ya tienes una cuenta? <a href="{% url 'login' %}">Inicia sesión aquí</a></p>
+    </div>
+</body>
+</html>
