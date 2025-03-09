@@ -8,7 +8,6 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 
 # Decorador para verificar la sesión
-
 def session_required(view_func):
     @wraps(view_func)
     def wrapped_view(request, *args, **kwargs):
@@ -18,7 +17,6 @@ def session_required(view_func):
     return wrapped_view
 
 # Rutas
-
 def error_404(request, exception):
     return render(request, '404.html', status=404)
 
@@ -37,10 +35,10 @@ def mregister(request):
     email = request.POST.get('email')
 
     if password != password2:
-        return JsonResponse({'error': 'Las contraseñas no coinciden'}, status=400)
+        return render(request, 'register.html', {'error': 'Las contraseñas no coinciden'})
 
     if user_collection.find_one({"usuario": usuario}):
-        return redirect('register')
+        return render(request, 'register.html', {'error': 'El usuario ya existe'})
 
     hash_password = make_password(password)
     modos_iniciales = {
@@ -52,7 +50,8 @@ def mregister(request):
         "usuario": usuario,
         "contrasena": hash_password,
         "email": email,
-        "modos": modos_iniciales
+        "modos": modos_iniciales,
+        "activo": True  # Campo nuevo que indica si el usuario está activo
     })
 
     return redirect('login')
@@ -63,7 +62,7 @@ def login(request):
 # Login de usuarios
 @require_http_methods(["POST"])
 def mlogin(request):
-    usuario = request.POST.get('username')  # En la BD es 'usuario'
+    usuario = request.POST.get('username')
     password = request.POST.get('password')
 
     # Buscar en ambas colecciones
@@ -71,28 +70,33 @@ def mlogin(request):
     admin = admin_collection.find_one({"usuario": usuario})
 
     if user and admin:
-        return JsonResponse({'error': 'Conflicto: El usuario existe en ambas colecciones'}, status=500)
+        return render(request, 'login.html', {'error': 'Conflicto: El usuario existe en ambas colecciones'})
 
     # Determinar si es usuario o admin
     if user and check_password(password, user['contrasena']):
+        # Verificar si el usuario está activo
+        if not user.get('activo', True):  # Si no existe el campo, asumir que está activo
+            return render(request, 'login.html', {'error': 'Esta cuenta ha sido desactivada. Contacte al administrador.'})
+
         request.session['usuario'] = usuario
         request.session['email'] = user['email']
-        request.session['tipo_usuario'] = 'usuario'  # Guardar el tipo en la sesión
+        request.session['tipo_usuario'] = 'usuario'
+
+        # Redirigir a los usuarios normales al dashboard de usuario
+        return redirect('user_dashboard')
+
     elif admin and check_password(password, admin['contrasena']):
+        # No verificamos 'activo' para administradores
         request.session['usuario'] = usuario
         request.session['email'] = admin['email']
-        request.session['tipo_usuario'] = 'admin'  # Guardar el tipo en la sesión
+        request.session['tipo_usuario'] = 'admin'
+
+        # Redirigir a los administradores al dashboard de admin
+        return redirect('dashboard')
     else:
-        return redirect('login')  # Si la autenticación falla, volver al login
-
-    request.session.modified = True  # Asegurar que se guarde la sesión correctamente
-    print(f'Sesión establecida para {usuario} como {request.session["tipo_usuario"]}')
-
-    return redirect('dashboard')
+        return render(request, 'login.html', {'error': 'Usuario o contraseña incorrectos'})
 
 # Dashboard con sesión requerida
-
-
 @session_required
 def dashboard(request):
     usuario = request.session.get('usuario', 'Invitado')
@@ -106,10 +110,10 @@ def dashboard(request):
         return JsonResponse({'error': 'Conflicto: El usuario existe en ambas colecciones'}, status=500)
 
     if not user and not admin:
-        return redirect('login')  # Si no existe en ninguna colección, redirigir al login
+        return redirect('login')
 
     # Determinar el tipo de usuario basado en la colección en la que se encontró
-    if user: #si el usuario vienen como none pues aqui no entra xd
+    if user:
         tipo_usuario = 'usuario'
         email = user.get('email', 'No disponible')
     else:
@@ -118,16 +122,129 @@ def dashboard(request):
 
     usuarios = []
     if tipo_usuario == 'admin':
-        usuarios = list(user_collection.find({}, {"_id": 0, "usuario": 1, "email": 1, "modos": 1}))
+        # Incluir el campo activo en la consulta
+        usuarios = list(user_collection.find({}, {"_id": 0, "usuario": 1, "email": 1, "modos": 1, "activo": 1}))
+
+    # Mostrar mensaje de éxito si existe
+    message = request.session.pop('message', None)
 
     return render(request, 'dashboard.html', {
         'usuario': usuario,
         'email': email,
-        'tipo_usuario': tipo_usuario,# Pasamos el tipo de usuario al template
-        'usuarios': usuarios
+        'tipo_usuario': tipo_usuario,
+        'usuarios': usuarios,
+        'message': message
     })
 
+# Nueva función para editar usuarios sin JS
+@session_required
+@require_http_methods(["POST"])
+def edit_user(request):
+    # Verificar que el usuario actual es admin
+    if request.session.get('tipo_usuario') != 'admin':
+        return redirect('dashboard')
 
+    old_usuario = request.POST.get('old_usuario')
+    nuevo_usuario = request.POST.get('usuario')
+    nuevo_email = request.POST.get('email')
+
+    # Verificar que el usuario existe
+    user = user_collection.find_one({"usuario": old_usuario})
+    if not user:
+        request.session['message'] = {'type': 'error', 'text': 'Usuario no encontrado'}
+        return redirect('dashboard')
+
+    # Verificar si el nuevo nombre de usuario ya existe (si está cambiando)
+    if old_usuario != nuevo_usuario and user_collection.find_one({"usuario": nuevo_usuario}):
+        request.session['message'] = {'type': 'error', 'text': 'El nombre de usuario ya está en uso'}
+        return redirect('dashboard')
+
+    # Actualizar usuario y email
+    update_result = user_collection.update_one(
+        {"usuario": old_usuario},
+        {"$set": {
+            "usuario": nuevo_usuario,
+            "email": nuevo_email
+        }}
+    )
+
+    if update_result.modified_count > 0:
+        request.session['message'] = {'type': 'success', 'text': 'Usuario actualizado correctamente'}
+    else:
+        request.session['message'] = {'type': 'info', 'text': 'No se realizaron cambios'}
+
+    return redirect('dashboard')
+
+# Función para desactivar usuarios (soft delete)
+@session_required
+@require_http_methods(["POST"])
+def deactivate_user(request):
+    # Verificar que el usuario actual es admin
+    if request.session.get('tipo_usuario') != 'admin':
+        return redirect('dashboard')
+
+    usuario_a_desactivar = request.POST.get('usuario')
+
+    # Verificar que el usuario existe
+    user = user_collection.find_one({"usuario": usuario_a_desactivar})
+    if not user:
+        request.session['message'] = {'type': 'error', 'text': 'Usuario no encontrado'}
+        return redirect('dashboard')
+
+    # Desactivar el usuario cambiando su estado a False
+    update_result = user_collection.update_one(
+        {"usuario": usuario_a_desactivar},
+        {"$set": {"activo": False}}
+    )
+
+    if update_result.modified_count > 0:
+        request.session['message'] = {'type': 'success', 'text': f'Usuario {usuario_a_desactivar} desactivado correctamente'}
+    else:
+        request.session['message'] = {'type': 'error', 'text': 'No se pudo desactivar el usuario'}
+
+    return redirect('dashboard')
+
+# Función para reactivar usuarios
+@session_required
+@require_http_methods(["POST"])
+def reactivate_user(request):
+    # Verificar que el usuario actual es admin
+    if request.session.get('tipo_usuario') != 'admin':
+        return redirect('dashboard')
+
+    usuario_a_reactivar = request.POST.get('usuario')
+
+    # Verificar que el usuario existe
+    user = user_collection.find_one({"usuario": usuario_a_reactivar})
+    if not user:
+        request.session['message'] = {'type': 'error', 'text': 'Usuario no encontrado'}
+        return redirect('dashboard')
+
+    # Reactivar el usuario cambiando su estado a True
+    update_result = user_collection.update_one(
+        {"usuario": usuario_a_reactivar},
+        {"$set": {"activo": True}}
+    )
+
+    if update_result.modified_count > 0:
+        request.session['message'] = {'type': 'success', 'text': f'Usuario {usuario_a_reactivar} reactivado correctamente'}
+    else:
+        request.session['message'] = {'type': 'error', 'text': 'No se pudo reactivar el usuario'}
+
+    return redirect('dashboard')
+
+# Agregar una función para el cierre de sesión
+def logout(request):
+    if 'usuario' in request.session:
+        del request.session['usuario']
+    if 'email' in request.session:
+        del request.session['email']
+    if 'tipo_usuario' in request.session:
+        del request.session['tipo_usuario']
+
+    return redirect('index')
+
+# Mantenemos la función original update_user por compatibilidad
 @csrf_exempt
 def update_user(request):
     if request.method == 'POST':
@@ -168,3 +285,18 @@ def update_user(request):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
+@session_required
+def user_dashboard(request):
+    if request.session.get('tipo_usuario') != 'usuario':
+        return redirect('dashboard')  # Redirige a administradores al dashboard de admin
+
+    usuario = request.session.get('usuario', 'Invitado')
+    email = request.session.get('email', 'No disponible')
+
+    return render(request, 'user_dashboard.html', {
+        'usuario': usuario,
+        'email': email
+    })
+
