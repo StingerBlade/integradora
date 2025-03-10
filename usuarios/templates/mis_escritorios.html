@@ -1,0 +1,209 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Escritorios</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        .navbar {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .escritorios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .escritorio-card {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .escritorio-header {
+            background-color: #28a745;
+            color: white;
+            padding: 15px;
+        }
+
+        .escritorio-content {
+            padding: 15px;
+        }
+
+        .escritorio-footer {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .alert {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .btn-browse {
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        h1, h2, h3, h4, h5 {
+            margin-top: 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .serie-badge {
+            display: inline-block;
+            background-color: #f8f9fa;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: monospace;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2>FocusDesk</h2>
+        <div>
+            <a href="{% url 'dashboard' %}" style="color: white; margin-right: 15px;">Dashboard</a>
+            <a href="{% url 'mis_escritorios' %}" style="color: white; margin-right: 15px;">Mis Escritorios</a>
+            <a href="{% url 'logout' %}" style="color: white;">Cerrar Sesión</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Mis Escritorios</h1>
+
+        {% if message %}
+        <div class="alert alert-{{ message.type }}">
+            {{ message.text }}
+        </div>
+        {% endif %}
+
+        {% if escritorios %}
+        <div class="escritorios-grid">
+            {% for escritorio in escritorios %}
+            <div class="escritorio-card">
+                <div class="escritorio-content">
+                    <form action="{% url 'editar_escritorio' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="escritorio_id" value="{{ escritorio.id }}">
+
+                        <div class="form-group">
+                            <label for="nombre_{{ escritorio.id }}">Nombre:</label>
+                            <input type="text" id="nombre_{{ escritorio.id }}" name="nombre" value="{{ escritorio.nombre }}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="descripcion_{{ escritorio.id }}">Descripción:</label>
+                            <textarea id="descripcion_{{ escritorio.id }}" name="descripcion" rows="3">{{ escritorio.descripcion }}</textarea>
+                        </div>
+
+                        <p><strong>Número de serie:</strong> <span class="serie-badge">{{ escritorio.numero_serie }}</span></p>
+
+                        <div class="escritorio-actions">
+                            <button type="submit" class="btn btn-success">Guardar cambios</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="escritorio-footer">
+                    <form action="{% url 'desasociar_escritorio' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="escritorio_id" value="{{ escritorio.id }}">
+                        <button type="submit" class="btn btn-danger">Desasociarme</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <h2>No tienes escritorios asociados</h2>
+            <p>Vincula un escritorio para comenzar a usar FocusDesk</p>
+            <a href="{% url 'vincular_escritorio' %}" class="btn btn-primary">Vincular un escritorio</a>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
