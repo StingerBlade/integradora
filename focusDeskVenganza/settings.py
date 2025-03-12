@@ -1,6 +1,5 @@
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    # Otros backends de autenticación si los tienes
 ]
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Usa la base de datos para almacenar sesiones
 SESSION_COOKIE_NAME = 'sessionid'  # Nombre de la cookie de sesión

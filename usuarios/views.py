@@ -53,7 +53,7 @@ def mregister(request):
         "contrasena": hash_password,
         "email": email,
         "modos": modos_iniciales,
-        "activo": True  # Campo para soft delete
+        "activo": True  #madre pa que no borre totalmente solo los desactive
     })
 
     return redirect('login')
