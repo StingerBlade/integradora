@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from django.conf.urls import handler404
+from . import api_views
 handler404 = 'usuarios.views.error_404'
 
 urlpatterns = [
@@ -28,4 +29,15 @@ urlpatterns = [
     path('escritorio/desasociar/', views.desasociar_escritorio, name='desasociar_escritorio'),
     path('mis-escritorios/', views.mis_escritorios, name='mis_escritorios'),
     path('escritorio/editar/', views.editar_escritorio, name='editar_escritorio'),
+     # Nuevas rutas para la API del ESP32
+    path('api/timer/register/', api_views.register_timer, name='api_register_timer'),
+    path('api/timer/user/<str:username>/', api_views.get_user_timers, name='api_get_user_timers'),
+    path('api/timer/user/<str:username>/<str:modo>/', api_views.get_user_timers, name='api_get_user_timers_by_mode'),
+
+    # Ruta para la vista de temporizadores
+    path('mis-timers/', views.mis_timers, name='mis_timers'),
+    path('mis-timers/<str:modo>/', views.mis_timers, name='mis_timers_by_mode'),
+    path('estadisticas/', views.estadisticas, name='estadisticas'),
+
+
 ]

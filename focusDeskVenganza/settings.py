@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'usuarios',
     'pylint',
     'template_partials',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

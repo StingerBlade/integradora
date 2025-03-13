@@ -14,6 +14,7 @@
         <div class="user-info">
             Hola, {{ usuario }} ({{ tipo_usuario }}) |
             <a href="{% url 'logout' %}"><button class="logout-btn">Cerrar Sesión</button></a>
+
         </div>
     </div>
 
@@ -32,6 +33,7 @@
             <div>
                 <a href="{% url 'vincular_escritorio' %}" class="btn">Vincular Escritorio</a>
                 <a href="{% url 'mis_escritorios' %}" class="btn">Administrar Mis Escritorios</a>
+                <a href="{% url 'estadisticas' %}" style="color: white; margin-right: 15px;">Estadísticas</a>
             </div>
             {% else %}
             <div>

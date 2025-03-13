@@ -8,6 +8,8 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from bson.objectid import ObjectId
 import random
+from datetime import datetime, timedelta
+import calendar
 
 # Decorador para verificar la sesión
 def session_required(view_func):
@@ -575,3 +577,165 @@ def editar_escritorio(request):
         request.session['message'] = {'type': 'info', 'text': 'No se realizaron cambios'}
 
     return redirect('mis_escritorios')
+
+@session_required
+def mis_timers(request, modo=None):
+    """
+    Vista para mostrar los temporizadores registrados por el ESP32 para el usuario actual
+    """
+    if request.session.get('tipo_usuario') != 'usuario':
+        return redirect('dashboard')
+
+    usuario = request.session.get('usuario')
+
+    # Obtener escritorios asociados al usuario para filtros
+    escritorios_cursor = escritorio_collection.find({
+        "usuarios": usuario,
+        "activo": True
+    })
+
+    escritorios = []
+    for escritorio in escritorios_cursor:
+        # Convertir _id a string
+        escritorio['id'] = str(escritorio['_id'])
+        escritorios.append(escritorio)
+
+    # Obtener el usuario con sus datos de temporizador
+    user = user_collection.find_one({"usuario": usuario})
+
+    if not user:
+        return redirect('login')
+
+    # Obtener los temporizadores del modo especificado o todos
+    timers = []
+    modos = user.get('modos', {})
+
+    if modo and modo in modos:
+        # Solo mostrar un modo específico
+        timers = modos[modo]
+        modo_actual = modo
+    elif modo:
+        # Si se especificó un modo que no existe, devolver lista vacía
+        timers = []
+        modo_actual = modo
+    else:
+        # Mostrar todos los modos combinados y ordenados por fecha
+        for m in ['estudio', 'entretenimiento']:
+            for timer in modos.get(m, []):
+                timer['modo'] = m  # Agregar el modo al timer para mostrarlo
+                timers.append(timer)
+        modo_actual = 'todos'
+
+    # Ordenar los temporizadores por fecha (más reciente primero)
+    if timers:
+        timers = sorted(timers, key=lambda x: x.get('timestamp', datetime.min), reverse=True)
+
+    return render(request, 'mis_timers.html', {
+        'timers': timers,
+        'escritorios': escritorios,
+        'modo_actual': modo_actual,
+        'message': request.session.pop('message', None)
+    })
+
+@session_required
+def estadisticas(request):
+    """
+    Vista para mostrar estadísticas de uso de los escritorios
+    """
+    if request.session.get('tipo_usuario') != 'usuario':
+        return redirect('dashboard')
+
+    usuario = request.session.get('usuario')
+
+    # Obtener parámetros de filtro
+    escritorio_id = request.GET.get('escritorio', 'todos')
+    modo = request.GET.get('modo', 'estudio')
+
+    # Obtener escritorios asociados al usuario para el selector
+    escritorios_cursor = escritorio_collection.find({
+        "usuarios": usuario,
+        "activo": True
+    })
+
+    escritorios = []
+    for escritorio in escritorios_cursor:
+        # Convertir _id a string
+        escritorio['id'] = str(escritorio['_id'])
+        escritorios.append(escritorio)
+
+    # Obtener el usuario con sus datos de temporizador
+    user = user_collection.find_one({"usuario": usuario})
+
+    if not user:
+        return redirect('login')
+
+    # Obtener los datos del modo seleccionado
+    modos = user.get('modos', {})
+    datos_modo = modos.get(modo, [])
+
+    # Filtrar por escritorio si es necesario
+    if escritorio_id != 'todos':
+        datos_modo = [dato for dato in datos_modo if dato.get('escritorio_id') == escritorio_id]
+
+    # Calcular fechas para filtrar
+    hoy = datetime.now()
+    inicio_semana = hoy - timedelta(days=hoy.weekday())
+    fin_semana = inicio_semana + timedelta(days=6)
+    inicio_mes = datetime(hoy.year, hoy.month, 1)
+    ultimo_dia = calendar.monthrange(hoy.year, hoy.month)[1]
+    fin_mes = datetime(hoy.year, hoy.month, ultimo_dia)
+
+    # Preparar datos para estadísticas
+    datos_semana = []
+    datos_mes = []
+
+    # Formato para comparar fechas: "YYYY-MM-DD"
+    for dato in datos_modo:
+        fecha_str = dato.get('fecha_str')
+        try:
+            fecha = datetime.strptime(fecha_str, '%Y-%m-%d %H:%M:%S')
+            segundos = dato.get('seconds', 0)
+            horas = segundos / 3600  # Convertir segundos a horas
+
+            # Filtrar por semana actual
+            if inicio_semana <= fecha <= fin_semana:
+                datos_semana.append({
+                    'fecha': fecha,
+                    'dia_semana': fecha.weekday(),  # 0=Lunes, 6=Domingo
+                    'horas': horas
+                })
+
+            # Filtrar por mes actual
+            if inicio_mes <= fecha <= fin_mes:
+                datos_mes.append({
+                    'fecha': fecha,
+                    'dia_mes': fecha.day,
+                    'horas': horas
+                })
+        except (ValueError, TypeError):
+            # Ignorar errores de formato de fecha
+            continue
+
+    # Calcular estadísticas por día de la semana
+    dias_semana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+    estadisticas_semana = []
+
+    for i, dia in enumerate(dias_semana):
+        horas_dia = sum(dato['horas'] for dato in datos_semana if dato['dia_semana'] == i)
+        estadisticas_semana.append({
+            'dia': dia,
+            'horas': round(horas_dia, 2)
+        })
+
+    # Calcular total del mes
+    total_horas_mes = sum(dato['horas'] for dato in datos_mes)
+
+    return render(request, 'estadisticas.html', {
+        'usuario': usuario,
+        'escritorios': escritorios,
+        'escritorio_seleccionado': escritorio_id,
+        'modo_seleccionado': modo,
+        'estadisticas_semana': estadisticas_semana,
+        'total_horas_mes': round(total_horas_mes, 2),
+        'mes_actual': hoy.strftime('%B %Y')
+    })
