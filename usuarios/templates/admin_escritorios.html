@@ -30,11 +30,16 @@
             <form action="{% url 'crear_escritorio' %}" method="POST">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="nombre">Nombre del Escritorio</label>
-                    <input type="text" id="nombre" name="nombre" required>
+                    <label for="numero_serie">Número de Chip del ESP32 <span style="color: var(--danger);">*</span></label>
+                    <input type="text" id="numero_serie" name="numero_serie" placeholder="Ej: 6445821C0610" required>
+                    <small>Escriba el número de chip único del ESP32 (12 caracteres)</small>
                 </div>
                 <div class="form-group">
-                    <label for="descripcion">Descripción</label>
+                    <label for="nombre">Nombre del Escritorio (opcional)</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Se generará automáticamente si se deja vacío">
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción (opcional)</label>
                     <textarea id="descripcion" name="descripcion" rows="3"></textarea>
                 </div>
                 <button type="submit" class="btn btn-success">Crear Escritorio</button>

@@ -13,7 +13,6 @@
         <div>
             <a href="{% url 'dashboard' %}" style="color: white; margin-right: 15px;">Dashboard</a>
             <a href="{% url 'mis_escritorios' %}" style="color: white; margin-right: 15px;">Mis Escritorios</a>
-            <a href="{% url 'estadisticas' %}" style="color: white; margin-right: 15px;">Estadísticas</a>
             <a href="{% url 'logout' %}" style="color: white;">Cerrar Sesión</a>
         </div>
     </div>
@@ -30,16 +29,18 @@
         <div class="card">
             <div class="instructions">
                 <p><strong>Instrucciones:</strong></p>
-                <p>Para vincular un escritorio a tu cuenta, necesitas ingresar el número de serie de 6 dígitos que está en el dispositivo o que te proporcionó el administrador.</p>
-                <p>Por ejemplo: 123456</p>
+                <p>Para vincular un escritorio a tu cuenta, necesitas ingresar el número de chip único del ESP32 que está en el dispositivo.</p>
+                <p>Este número de 12 caracteres identifica únicamente a cada ESP32.</p>
+                <p>Por ejemplo: <code>6445821C0610</code></p>
             </div>
 
             <form action="{% url 'asociar_por_serie' %}" method="POST">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="numero_serie">Número de Serie del Escritorio:</label>
-                    <input type="text" id="numero_serie" name="numero_serie" placeholder="123456" pattern="\d{6}" maxlength="6" required>
-                    <small>El número de serie debe contener 6 dígitos numéricos</small>
+                    <label for="numero_serie">Número de Chip del ESP32:</label>
+                    <input type="text" id="numero_serie" name="numero_serie" placeholder="6445821C0610"
+                           pattern="[A-Za-z0-9]{12}" maxlength="12" required>
+                    <small>El número de chip debe contener exactamente 12 caracteres alfanuméricos</small>
                 </div>
                 <button type="submit" class="btn">Vincular Escritorio</button>
             </form>

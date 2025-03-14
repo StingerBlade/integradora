@@ -274,6 +274,7 @@ def admin_escritorios(request):
         'message': request.session.pop('message', None)
     })
 
+
 # Crear un nuevo escritorio
 @session_required
 @require_http_methods(["POST"])
@@ -282,19 +283,23 @@ def crear_escritorio(request):
     if request.session.get('tipo_usuario') != 'admin':
         return redirect('dashboard')
 
-    nombre = request.POST.get('nombre')
-    descripcion = request.POST.get('descripcion')
+    numero_serie = request.POST.get('numero_serie')  # Número de chip del ESP32
+    nombre = request.POST.get('nombre', '')  # Opcional, puede estar vacío
+    descripcion = request.POST.get('descripcion', '')  # Opcional, puede estar vacío
 
-    if not nombre:
-        request.session['message'] = {'type': 'error', 'text': 'El nombre del escritorio es obligatorio'}
+    # Solo verificamos que el número de serie esté presente
+    if not numero_serie:
+        request.session['message'] = {'type': 'error', 'text': 'El número de chip del ESP32 es obligatorio'}
         return redirect('admin_escritorios')
 
-    # Generar un número de serie único de 6 dígitos
-    numero_serie = ''.join(random.choices('0123456789', k=6))
+    # Si el nombre está vacío, usamos un nombre predeterminado basado en el número de serie
+    if not nombre:
+        nombre = f"Escritorio {numero_serie[-4:]}"  # Últimos 4 caracteres del número de chip
 
     # Verificar que el número de serie no exista ya
-    while escritorio_collection.find_one({"numero_serie": numero_serie}):
-        numero_serie = ''.join(random.choices('0123456789', k=6))
+    if escritorio_collection.find_one({"numero_serie": numero_serie}):
+        request.session['message'] = {'type': 'error', 'text': 'Ya existe un escritorio con este número de chip'}
+        return redirect('admin_escritorios')
 
     # Crear el escritorio
     nuevo_escritorio = {
@@ -307,7 +312,7 @@ def crear_escritorio(request):
 
     escritorio_collection.insert_one(nuevo_escritorio)
 
-    request.session['message'] = {'type': 'success', 'text': f'Escritorio "{nombre}" creado correctamente con número de serie: {numero_serie}'}
+    request.session['message'] = {'type': 'success', 'text': f'Escritorio creado correctamente con número de chip: {numero_serie}'}
     return redirect('admin_escritorios')
 
 # Desactivar un escritorio (soft delete)
@@ -395,17 +400,17 @@ def asociar_por_serie(request):
     numero_serie = request.POST.get('numero_serie')
 
     if not numero_serie:
-        request.session['message'] = {'type': 'error', 'text': 'Debe ingresar un número de serie'}
+        request.session['message'] = {'type': 'error', 'text': 'Debe ingresar el número de chip del ESP32'}
         return redirect('vincular_escritorio')
 
-    # Buscar el escritorio por número de serie
+    # Buscar el escritorio por número de serie (chip)
     escritorio = escritorio_collection.find_one({
         "numero_serie": numero_serie,
         "activo": True
     })
 
     if not escritorio:
-        request.session['message'] = {'type': 'error', 'text': 'Número de serie inválido o escritorio inactivo'}
+        request.session['message'] = {'type': 'error', 'text': 'Número de chip inválido o escritorio inactivo'}
         return redirect('vincular_escritorio')
 
     # Asociar usuario si no está ya asociado
