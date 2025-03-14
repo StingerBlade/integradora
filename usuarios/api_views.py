@@ -3,7 +3,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from bson.objectid import ObjectId
 import json
-from datetime import datetime
+from datetime import datetime, timezone
+import pytz
 from .models import user_collection, escritorio_collection
 
 @csrf_exempt
@@ -77,14 +78,21 @@ def register_timer(request):
                 'error': 'Usuario no vinculado a este escritorio'
             }, status=403)
 
+        # Zona horaria del norte de México
+        local_timezone = pytz.timezone('America/Monterrey')
+
+        # Obtener tiempos en UTC y tiempo local
+        now_utc = datetime.now(timezone.utc)
+        now_local = now_utc.astimezone(local_timezone)
+
         # Crear el registro del temporizador
         timer_data = {
             'seconds': data.get('seconds'),
             'escritorio_id': str(escritorio['_id']),
             'escritorio_serie': escritorio_serie,
             'escritorio_nombre': escritorio.get('nombre', 'Sin nombre'),
-            'timestamp': datetime.now(),
-            'fecha_str': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            'timestamp': now_utc,
+            'fecha_str': now_local.strftime('%Y-%m-%d %H:%M:%S')
         }
 
         # Actualizar el documento del usuario agregando el temporizador al modo específico
