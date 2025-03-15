@@ -30,4 +30,4 @@ __pycache__/
 Thumbs.db
 
 # Carpetas generadas por Django
-staticfiles/
+
