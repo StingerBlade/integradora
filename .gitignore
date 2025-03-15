@@ -1,2 +1,35 @@
 .qodo
 
+# Ignorar archivos de entorno
+.env
+
+# No ignorar las versiones actualizadas de estos archivos
+# confDB.py
+# apiDB.py
+
+# Ignorar archivos de base de datos de Django
+db.sqlite3
+
+# Ignorar carpetas de dependencias de Python
+venv/
+env/
+__pycache__/
+
+# Ignorar archivos de compilación de Python
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Archivos de IDE y editores
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
+
+# Carpetas generadas por Django
+staticfiles/

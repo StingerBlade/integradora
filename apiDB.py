@@ -1,8 +1,14 @@
 import os
 from pymongo import MongoClient
+from dotenv import load_dotenv
 
-# Usar la variable de entorno o un valor predeterminado (para desarrollo local)
-uri = os.environ.get("MONGODB_URI_1", "mongodb+srv://valeria:valeria@integradora.rr5fz.mongodb.net/?retryWrites=true&w=majority&appName=Integradora")
+# Cargar variables de entorno
+load_dotenv()
+
+# Obtener URI de MongoDB desde variables de entorno
+uri = os.getenv('MONGODB_URI_1')
+if not uri:
+    raise ValueError("MONGODB_URI_1 no está configurada en las variables de entorno")
 
 client = MongoClient(uri)
 db = client["valeria"]
