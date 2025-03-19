@@ -5,22 +5,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Registrarse</title>
-<link rel="stylesheet" href="{% static 'focusdesk.css' %}">
+    <link rel="stylesheet" href="{% static 'focusdesk.css' %}?v=1.1">
 </head>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.querySelector("form");
-        form.addEventListener("submit", function (event) {
-            const password1 = document.getElementById("pswd").value;
-            const password2 = document.getElementById("pswd2").value;
-
-            if (password1 !== password2) {
-                event.preventDefault();
-                alert("Las contraseñas no coinciden. Inténtalo de nuevo.");
-            }
-        });
-    });
-</script>
 
 <body>
     <div class="contenedor-formulario">
@@ -53,6 +39,11 @@
 
             <button type="submit">Registrarse</button>
         </form>
+
+        {% if error %}
+        <div class="alert alert-error">{{ error }}</div>
+        {% endif %}
+
         <div id="response"></div>
         <p>¿Ya tienes una cuenta? <a href="{% url 'login' %}">Inicia sesión aquí</a></p>
     </div>

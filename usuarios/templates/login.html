@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login</title>
-    <link rel="stylesheet" href="{% static 'focusdesk.css' %}">
+    <link rel="stylesheet" href="{% static 'focusdesk.css' %}?v=1.1">
 </head>
 
 <body>
@@ -27,7 +27,7 @@
                 <input type="password" name="password" id="password" placeholder="****" required />
             </div>
 
-            <button type="submit">Login</button>
+            <button type="submit" class="btn-form">Login</button>
         </form>
 
         <p>¿No tienes una cuenta? <a href="{% url 'register' %}">Regístrate aquí</a></p>

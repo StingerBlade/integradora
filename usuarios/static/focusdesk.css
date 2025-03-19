@@ -174,12 +174,41 @@ textarea {
     transition: var(--transition);
     text-decoration: none;
     text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
 }
 
 .btn:hover {
     background: var(--primary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(53, 122, 189, 0.4);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Efecto de brillo al pasar el cursor */
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.btn:hover::after {
+    left: 100%;
 }
 
 .btn-block {
@@ -197,36 +226,120 @@ textarea {
     font-size: 1.1rem;
 }
 
+/* Variantes por color - Solo cambiando el color de fondo */
 .btn-primary {
-    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    background: var(--primary);
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
 }
 
 .btn-success {
-    background: linear-gradient(45deg, var(--success), #27ae60);
+    background: var(--success);
+}
+
+.btn-success:hover {
+    background: #27ae60; /* Versión más oscura del verde */
 }
 
 .btn-danger {
-    background: linear-gradient(45deg, var(--danger), #c0392b);
+    background: var(--danger);
+}
+
+.btn-danger:hover {
+    background: #c0392b; /* Versión más oscura del rojo */
 }
 
 .btn-warning {
-    background: linear-gradient(45deg, var(--warning), #d35400);
-    color: #fff;
+    background: var(--warning);
+}
+
+.btn-warning:hover {
+    background: #d35400; /* Versión más oscura del naranja */
 }
 
 .btn-info {
-    background: linear-gradient(45deg, var(--info), #2980b9);
+    background: var(--info);
+}
+
+.btn-info:hover {
+    background: #2980b9; /* Versión más oscura del azul info */
 }
 
 .btn-outline {
     background: transparent;
     border: 1px solid var(--primary);
     color: var(--primary);
+    box-shadow: none;
 }
 
 .btn-outline:hover {
     background: var(--primary);
     color: white;
+}
+
+/* Combinaciones de variantes */
+.btn-primary.btn-outline {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.btn-success.btn-outline {
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.btn-success.btn-outline:hover {
+    background: var(--success);
+    color: white;
+}
+
+.btn-danger.btn-outline {
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+.btn-danger.btn-outline:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-warning.btn-outline {
+    border-color: var(--warning);
+    color: var(--warning);
+}
+
+.btn-warning.btn-outline:hover {
+    background: var(--warning);
+    color: white;
+}
+
+.btn-info.btn-outline {
+    border-color: var(--info);
+    color: var(--info);
+}
+
+.btn-info.btn-outline:hover {
+    background: var(--info);
+    color: white;
+}
+
+/* Efecto de pulso para botones primarios al recibir foco */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(74, 144, 226, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(74, 144, 226, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(74, 144, 226, 0);
+    }
+}
+
+.btn-primary:focus {
+    animation: pulse 1.5s infinite;
 }
 
 /* Alerts */
@@ -547,6 +660,117 @@ tr:hover {
     margin-bottom: 20px;
 }
 
+/* Estilos específicos para botones de formulario de login y registro */
+.contenedor-formulario button[type="submit"],
+.btn-form {
+    display: block;
+    width: 100%;
+    padding: 15px 20px;
+    margin-top: 25px;
+    margin-bottom: 20px;
+    background: var(--primary);
+    color: var(--light-text);
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.contenedor-formulario button[type="submit"]:hover,
+.btn-form:hover {
+    background: var(--primary-dark);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.contenedor-formulario button[type="submit"]:active,
+.btn-form:active {
+    transform: translateY(1px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Efecto de brillo al pasar el cursor */
+.contenedor-formulario button[type="submit"]::after,
+.btn-form::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.contenedor-formulario button[type="submit"]:hover::after,
+.btn-form:hover::after {
+    left: 100%;
+}
+
+/* Mejoras para grupos de entrada en formularios de login/registro */
+.grupo-entrada {
+    margin-bottom: 24px;
+}
+
+.grupo-entrada label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--light-text);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.grupo-entrada input {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--light-text);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.grupo-entrada input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.25);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Mejora enlaces en formularios */
+.contenedor-formulario p {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.contenedor-formulario p a {
+    color: var(--primary-light);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 3px 6px;
+    border-radius: 4px;
+}
+
+.contenedor-formulario p a:hover {
+    color: white;
+    background-color: var(--primary);
+    text-decoration: none;
+}
+
 /* Split container for landing page */
 .split-container {
     width: 100%;
@@ -647,4 +871,3 @@ tr:hover {
 .gap-1 { gap: 0.5rem; }
 .gap-2 { gap: 1rem; }
 .gap-3 { gap: 1.5rem; }
-

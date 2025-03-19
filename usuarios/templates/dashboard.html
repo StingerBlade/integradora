@@ -13,7 +13,7 @@
         <h2>Panel de Control</h2>
         <div class="user-info">
             Hola, {{ usuario }} ({{ tipo_usuario }}) |
-            <a href="{% url 'logout' %}"><button class="logout-btn">Cerrar Sesión</button></a>
+            <a href="{% url 'logout' %}"><button class="btn btn-danger btn-sm">Cerrar Sesión</button></a>
 
         </div>
     </div>
@@ -33,7 +33,7 @@
             <div>
                 <a href="{% url 'vincular_escritorio' %}" class="btn">Vincular Escritorio</a>
                 <a href="{% url 'mis_escritorios' %}" class="btn">Administrar Mis Escritorios</a>
-                <a href="{% url 'estadisticas' %}" style="color: white; margin-right: 15px;">Estadísticas</a>
+                <a href="{% url 'estadisticas' %}" class="btn">Estadísticas</a>
             </div>
             {% else %}
             <div>
@@ -64,14 +64,14 @@
                     <td><input type="text" name="usuario" value="{{ user.usuario }}"></td>
                     <td><input type="email" name="email" value="{{ user.email }}"></td>
                     <td class="action-buttons">
-                        <input type="submit" value="Guardar">
+                        <input type="submit" class="btn btn-success" value="Guardar">
                 </form>
 
                 {% if user.activo %}
                     <form action="{% url 'deactivate_user' %}" method="POST" style="display: inline;">
                         {% csrf_token %}
                         <input type="hidden" name="usuario" value="{{ user.usuario }}">
-                        <input type="submit" value="Desactivar" class="delete-btn">
+                        <input type="submit" value="Desactivar" class="btn btn-danger">
                     </form>
                 {% else %}
                     <form action="{% url 'reactivate_user' %}" method="POST" style="display: inline;">
