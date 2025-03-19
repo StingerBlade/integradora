@@ -853,6 +853,13 @@ tr:hover {
     }
 }
 
+.day-time {
+    display: block;
+    font-weight: bold;
+    margin-top: 5px;
+    color: var(--primary);
+}
+
 /* Utility Classes */
 .mt-1 { margin-top: 0.5rem; }
 .mt-2 { margin-top: 1rem; }

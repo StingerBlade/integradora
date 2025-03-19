@@ -136,34 +136,13 @@
                 <div class="card">
                     <h2 class="card-title">Esta Semana</h2>
                     <ul class="calendar">
-                        <li class="calendar-day">
-                            <span class="day-name">Domingo</span>
-                            <span class="day-date">{% now "d/m" %}</span>
+                        {% for day in week_data %}
+                        <li class="calendar-day {% if day.is_current %}day-current{% endif %}">
+                            <span class="day-name">{{ day.name }}</span>
+                            <span class="day-date">{{ day.date }}</span>
+                            <span class="day-time">{{ day.time }}</span>
                         </li>
-                        <li class="calendar-day day-current">
-                            <span class="day-name">Lunes</span>
-                            <span class="day-date">{% now "d/m" %}</span>
-                        </li>
-                        <li class="calendar-day">
-                            <span class="day-name">Martes</span>
-                            <span class="day-date">{% now "d/m" %}</span>
-                        </li>
-                        <li class="calendar-day">
-                            <span class="day-name">Miércoles</span>
-                            <span class="day-date">{% now "d/m" %}</span>
-                        </li>
-                        <li class="calendar-day">
-                            <span class="day-name">Jueves</span>
-                            <span class="day-date">{% now "d/m" %}</span>
-                        </li>
-                        <li class="calendar-day">
-                            <span class="day-name">Viernes</span>
-                            <span class="day-date">{% now "d/m" %}</span>
-                        </li>
-                        <li class="calendar-day">
-                            <span class="day-name">Sábado</span>
-                            <span class="day-date">{% now "d/m" %}</span>
-                        </li>
+                        {% endfor %}
                     </ul>
                 </div>
             </div>

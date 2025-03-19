@@ -95,7 +95,6 @@ def mlogin(request):
     request.session.modified = True
     return redirect('dashboard')
 
-# Dashboard con sesión requerida
 @session_required
 def dashboard(request):
     usuario = request.session.get('usuario', 'Invitado')
@@ -129,6 +128,7 @@ def dashboard(request):
 
         # No necesitamos escritorios para admins en el dashboard principal
         escritorios = []
+        week_data = None
     else:
         # Para usuarios normales: sus escritorios
         usuarios = None
@@ -145,6 +145,60 @@ def dashboard(request):
             escritorio['id'] = str(escritorio['_id'])
             escritorios.append(escritorio)
 
+        # Preparar datos del calendario con tiempo total por día
+        import datetime
+        from datetime import timedelta
+
+        # Obtener fecha actual y calcular inicio de la semana (lunes)
+        today = datetime.datetime.now()
+        start_of_week = today - timedelta(days=today.weekday())
+
+        # Preparar datos para cada día de la semana
+        week_data = []
+        day_names = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+
+        for i in range(7):
+            current_date = start_of_week + timedelta(days=i)
+            date_str = current_date.strftime('%d/%m')
+
+            # Inicializar tiempo total para este día
+            total_seconds = 0
+
+            # Si tenemos datos de usuario, buscar actividad en este día
+            if user and 'modos' in user:
+                # Formato de fecha para comparar
+                target_date = current_date.strftime('%Y-%m-%d')
+
+                # Buscar en modo estudio
+                for entry in user['modos'].get('estudio', []):
+                    if 'fecha_str' in entry and entry['fecha_str'].startswith(target_date):
+                        total_seconds += entry.get('seconds', 0)
+
+                # Buscar en modo entretenimiento
+                for entry in user['modos'].get('entretenimiento', []):
+                    if 'fecha_str' in entry and entry['fecha_str'].startswith(target_date):
+                        total_seconds += entry.get('seconds', 0)
+
+            # Convertir segundos a formato legible
+            if total_seconds > 0:
+                hours = total_seconds // 3600
+                minutes = (total_seconds % 3600) // 60
+                time_str = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
+            else:
+                time_str = "0m"
+
+            # Determinar si es el día actual comparando día, mes y año
+            is_current = (current_date.day == today.day and
+                          current_date.month == today.month and
+                          current_date.year == today.year)
+
+            week_data.append({
+                'name': day_names[i],
+                'date': date_str,
+                'time': time_str,
+                'is_current': is_current
+            })
+
     # Mostrar mensaje de éxito si existe
     message = request.session.pop('message', None)
 
@@ -154,9 +208,9 @@ def dashboard(request):
         'tipo_usuario': tipo_usuario,
         'usuarios': usuarios,
         'escritorios': escritorios,
+        'week_data': week_data,
         'message': message
     })
-
 # CRUD para usuarios
 @session_required
 @require_http_methods(["POST"])
