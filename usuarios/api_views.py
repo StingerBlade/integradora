@@ -6,7 +6,8 @@ import json
 from datetime import datetime, timezone
 import pytz
 from .models import user_collection, escritorio_collection
-
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 @csrf_exempt
 @require_http_methods(["POST"])
 def register_timer(request):
@@ -101,7 +102,31 @@ def register_timer(request):
             {"$push": {f"modos.{modo}": timer_data}}
         )
 
+        # Si la actualización fue exitosa, enviar notificación por WebSocket
         if update_result.modified_count > 0:
+            try:
+                # Obtener capa de canales para WebSockets
+                channel_layer = get_channel_layer()
+
+                # Enviar mensaje al grupo del usuario
+                async_to_sync(channel_layer.group_send)(
+                    f'user_{username}',
+                    {
+                        'type': 'usage_update',
+                        'message': {
+                            'mode': modo,
+                            'seconds': data.get('seconds'),
+                            'escritorio_nombre': escritorio.get('nombre', 'Sin nombre'),
+                            'timestamp': now_local.strftime('%Y-%m-%d %H:%M:%S')
+                        }
+                    }
+                )
+                print(f"WebSocket notification sent to user_{username}")
+            except Exception as ws_error:
+                print(f"WebSocket error: {str(ws_error)}")
+                # Continuar incluso si hay un error en WebSocket
+                pass
+
             return JsonResponse({
                 'success': True,
                 'message': f'Datos del temporizador registrados correctamente en modo {modo}',
@@ -122,7 +147,7 @@ def register_timer(request):
             'success': False,
             'error': str(e)
         }, status=500)
-
+# Este metodo casi no se usa si no es que nunca
 @require_http_methods(["GET"])
 def get_user_timers(request, username, modo=None):
     """
