@@ -1,0 +1,17 @@
+
+services:
+  - type: web
+    name: focusdesk
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn focusDeskVenganza.wsgi:application"
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: MONGODB_URI_1
+        sync: false
+      - key: MONGODB_URI_2
+        sync: false
+    http_only: true
