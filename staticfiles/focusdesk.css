@@ -1,24 +1,25 @@
-/* FocusDesk Main Stylesheet */
+/* FocusDesk Main Stylesheet - Actualizado con paleta moderna */
 :root {
-    /* Color palette */
-    --primary: #4A90E2;
-    --primary-dark: #357ABD;
-    --primary-light: #69A3E8;
-    --secondary: #8e44ad;
-    --success: #2ecc71;
-    --danger: #e74c3c;
-    --warning: #f39c12;
-    --info: #3498db;
-    --dark: #1a1a1a;
-    --dark-accent: #2d2d2d;
-    --light-text: #ffffff;
-    --muted-text: rgba(255, 255, 255, 0.7);
-    --border-color: rgba(255, 255, 255, 0.1);
-    --card-bg: rgba(255, 255, 255, 0.08);
-    --hover-bg: rgba(255, 255, 255, 0.12);
-    --input-bg: rgba(255, 255, 255, 0.06);
-    --shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-    --transition: all 0.3s ease;
+    /* Color palette actualizada */
+    --primary: #9BE446;         /* Verde lima brillante (equivalente al verde de Grass) */
+    --primary-dark: #77AD2B;    /* Verde más oscuro para hover */
+    --primary-light: #A6CE39;   /* Verde claro */
+    --secondary: #8e44ad;       /* Mantener púrpura original */
+    --success: #2ecc71;         /* Mantener verde original */
+    --danger: #e74c3c;          /* Mantener rojo original */
+    --warning: #f39c12;         /* Mantener naranja original */
+    --info: #3498db;            /* Mantener azul original */
+    --dark: #333333;            /* Texto oscuro más suave */
+    --dark-accent: #444444;     /* Gris oscuro más suave */
+    --light-text: #ffffff;      /* Texto claro */
+    --muted-text: rgba(0, 0, 0, 0.6); /* Texto semi-transparente */
+    --border-color: #E5E5E5;    /* Bordes sutiles */
+    --card-bg: #FFFFFF;         /* Fondo tarjetas blanco */
+    --hover-bg: #F0F0F0;        /* Fondo hover más claro */
+    --input-bg: #F8F8F8;        /* Fondo para inputs */
+    --shadow: 0 4px 8px rgba(0, 0, 0, 0.08); /* Sombra más moderna */
+    --transition: all 0.3s ease; /* Transición estándar */
+    --background: #f5f5f5;      /* Fondo principal claro */
 }
 
 * {
@@ -31,8 +32,8 @@
 body {
     width: 100%;
     min-height: 100vh;
-    background: linear-gradient(135deg, var(--dark), var(--dark-accent));
-    color: var(--light-text);
+    background: var(--background);
+    color: var(--dark);
     line-height: 1.6;
 }
 
@@ -43,7 +44,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--dark);
+    background: var(--background);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -57,9 +58,7 @@ body {
 
 /* Navigation Bar */
 .navbar {
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background-color: var(--card-bg);
     border-bottom: 1px solid var(--border-color);
     padding: 15px 30px;
     position: sticky;
@@ -69,7 +68,7 @@ body {
 }
 
 .navbar a {
-    color: var(--light-text);
+    color: var(--dark);
     margin-right: 20px;
     text-decoration: none;
     font-weight: 500;
@@ -79,7 +78,7 @@ body {
 }
 
 .navbar a:hover {
-    color: var(--primary);
+    color: var(--primary-dark);
     background: var(--hover-bg);
 }
 
@@ -98,19 +97,17 @@ body {
     margin-bottom: 25px;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
     transition: var(--transition);
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
 }
 
 .card-title {
     font-size: 1.5rem;
-    color: var(--light-text);
+    color: var(--dark);
     margin-bottom: 20px;
     padding-bottom: 15px;
     border-bottom: 1px solid var(--border-color);
@@ -123,7 +120,7 @@ body {
 
 label {
     display: block;
-    color: var(--light-text);
+    color: var(--dark);
     margin-bottom: 8px;
     font-weight: 500;
     letter-spacing: 0.5px;
@@ -139,7 +136,7 @@ select {
     background: var(--input-bg);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    color: var(--light-text);
+    color: var(--dark);
     font-size: 0.95rem;
     transition: var(--transition);
 }
@@ -151,8 +148,8 @@ textarea:focus,
 select:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.25);
-    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 2px rgba(155, 228, 70, 0.25);
+    background: var(--input-bg);
 }
 
 textarea {
@@ -165,7 +162,7 @@ textarea {
     display: inline-block;
     padding: 10px 20px;
     background: var(--primary);
-    color: white;
+    color: var(--dark);
     border: none;
     border-radius: 8px;
     font-size: 0.95rem;
@@ -328,13 +325,13 @@ textarea {
 /* Efecto de pulso para botones primarios al recibir foco */
 @keyframes pulse {
     0% {
-        box-shadow: 0 0 0 0 rgba(74, 144, 226, 0.7);
+        box-shadow: 0 0 0 0 rgba(155, 228, 70, 0.7);
     }
     70% {
-        box-shadow: 0 0 0 10px rgba(74, 144, 226, 0);
+        box-shadow: 0 0 0 10px rgba(155, 228, 70, 0);
     }
     100% {
-        box-shadow: 0 0 0 0 rgba(74, 144, 226, 0);
+        box-shadow: 0 0 0 0 rgba(155, 228, 70, 0);
     }
 }
 
@@ -391,11 +388,12 @@ th, td {
 }
 
 th {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: #f9f9f9;
     font-weight: 600;
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 1px;
+    color: var(--dark);
 }
 
 tr:last-child td {
@@ -472,7 +470,7 @@ tr:hover {
 .escritorio-header {
     background-color: var(--primary);
     padding: 20px;
-    color: white;
+    color: var(--dark);
 }
 
 .escritorio-content {
@@ -482,7 +480,7 @@ tr:hover {
 .escritorio-footer {
     padding: 15px;
     border-top: 1px solid var(--border-color);
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.05);
     text-align: center;
 }
 
@@ -527,7 +525,7 @@ tr:hover {
     align-items: center;
     margin-right: 20px;
     font-size: 1.3rem;
-    box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+    box-shadow: 0 5px 15px rgba(155, 228, 70, 0.3);
 }
 
 .workspace-details {
@@ -539,7 +537,7 @@ tr:hover {
     font-weight: 600;
     font-size: 1.1rem;
     margin-bottom: 8px;
-    color: var(--light-text);
+    color: var(--dark);
 }
 
 .workspace-description {
@@ -624,7 +622,7 @@ tr:hover {
     background: rgba(52, 152, 219, 0.15);
     border-left: 4px solid var(--info);
     border-radius: 0 8px 8px 0;
-    color: var(--light-text);
+    color: var(--dark);
 }
 
 .instructions strong {
@@ -637,27 +635,37 @@ tr:hover {
     max-width: 450px;
     padding: 40px;
     background: var(--card-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--border-color);
     border-radius: 16px;
     box-shadow: var(--shadow);
     margin: 80px auto;
 }
 
+/* Centrar el logo en el contenedor */
 .contenedor-logo {
     text-align: center;
     margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .logo {
     width: 100px;
     height: 100px;
-    padding: 10px;
-    background-color: black;
-    border: 2px solid var(--border-color);
     border-radius: 50%;
     margin-bottom: 20px;
+    padding: 0; /* Quitar el padding */
+    background-color: black; /* Mantener el fondo negro */
+    border: 2px solid var(--border-color);
+    display: block;
+    overflow: hidden; /* Evita que la imagen desborde el círculo */
+    object-fit: cover; /* Hace que la imagen cubra todo el espacio */
+}
+.logo img {
+    width: 100%; /* La imagen ocupa todo el ancho */
+    height: 100%; /* La imagen ocupa todo el alto */
+    object-fit: cover; /* Asegura que la imagen cubra todo el espacio */
 }
 
 /* Estilos específicos para botones de formulario de login y registro */
@@ -669,7 +677,7 @@ tr:hover {
     margin-top: 25px;
     margin-bottom: 20px;
     background: var(--primary);
-    color: var(--light-text);
+    color: var(--dark);
     border: none;
     border-radius: 10px;
     font-size: 1.1rem;
@@ -727,7 +735,7 @@ tr:hover {
 .grupo-entrada label {
     display: block;
     margin-bottom: 10px;
-    color: var(--light-text);
+    color: var(--dark);
     font-weight: 500;
     letter-spacing: 0.5px;
 }
@@ -738,7 +746,7 @@ tr:hover {
     background: var(--input-bg);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    color: var(--light-text);
+    color: var(--dark);
     font-size: 0.95rem;
     transition: all 0.3s ease;
 }
@@ -746,8 +754,8 @@ tr:hover {
 .grupo-entrada input:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.25);
-    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(155, 228, 70, 0.25);
+    background: var(--input-bg);
 }
 
 /* Mejora enlaces en formularios */
@@ -757,7 +765,7 @@ tr:hover {
 }
 
 .contenedor-formulario p a {
-    color: var(--primary-light);
+    color: var(--primary);
     text-decoration: none;
     font-weight: 500;
     transition: all 0.3s ease;
@@ -766,7 +774,7 @@ tr:hover {
 }
 
 .contenedor-formulario p a:hover {
-    color: white;
+    color: var(--dark);
     background-color: var(--primary);
     text-decoration: none;
 }
@@ -789,13 +797,13 @@ tr:hover {
 }
 
 .login-half {
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(5px);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--dark);
 }
 
 .register-half {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(5px);
+    background: rgba(155, 228, 70, 0.1);
+    color: var(--dark);
 }
 
 .split-half:hover {

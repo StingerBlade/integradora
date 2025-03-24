@@ -87,7 +87,7 @@
             flex: 1;
             text-align: center;
             transition: var(--transition);
-            color: var(--light-text);
+            color: black;
         }
         .mode-btn:hover {
             background: var(--hover-bg);
@@ -162,7 +162,9 @@
                 <div class="weekly-stats">
                     {% for dia in estadisticas_semana %}
                     <div class="day-stats">
-                        <h3>{{ dia.dia }}</h3>
+                        <h3 style="color: black;">{{ dia.dia }}</h3>
+
+
                         <div class="hours-bar">
                             <div class="hours-value" id="bar-{{ forloop.counter }}"
                                  data-value="{{ dia.horas|floatformat:2 }}"
