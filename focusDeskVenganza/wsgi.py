@@ -14,3 +14,9 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'focusDeskVenganza.settings')
 
 application = get_wsgi_application()
+
+# Añade esto al final del archivo wsgi.py
+application = get_wsgi_application()
+
+# Línea necesaria para Vercel
+app = application
