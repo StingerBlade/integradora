@@ -750,36 +750,62 @@ def estadisticas(request):
 
     # Formato para comparar fechas: "YYYY-MM-DD"
     for dato in datos_modo:
-        fecha_str = dato.get('fecha_str')
+        fecha_str = dato.get('fecha_str', '')
+        segundos = dato.get('seconds', 0)
+
+        # Asegurar que segundos sea un número
         try:
-            fecha = datetime.strptime(fecha_str, '%Y-%m-%d %H:%M:%S')
-            segundos = dato.get('seconds', 0)
-            horas = segundos / 3600  # Convertir segundos a horas
+            segundos = int(segundos)
+        except (TypeError, ValueError):
+            segundos = 0
 
-            # Filtrar por semana actual
-            if inicio_semana <= fecha <= fin_semana:
-                datos_semana.append({
-                    'fecha': fecha,
-                    'dia_semana': fecha.weekday(),  # 0=Lunes, 6=Domingo
-                    'horas': horas
-                })
+        horas = segundos / 3600  # Convertir segundos a horas
 
-            # Filtrar por mes actual
-            if inicio_mes <= fecha <= fin_mes:
-                datos_mes.append({
-                    'fecha': fecha,
-                    'dia_mes': fecha.day,
-                    'horas': horas
-                })
-        except (ValueError, TypeError):
-            # Ignorar errores de formato de fecha
+        # Intentar diferentes formatos de fecha
+        fecha = None
+        try:
+            # Primero intentar con el formato completo
+            if fecha_str and ' ' in fecha_str:
+                fecha_parte = fecha_str.split(' ')[0]
+                fecha = datetime.strptime(fecha_parte, '%Y-%m-%d')
+            else:
+                continue
+        except (ValueError, TypeError, AttributeError):
+            # Si falla, intentar extraer la fecha de otra manera
+            try:
+                if isinstance(dato.get('timestamp'), datetime):
+                    fecha = dato.get('timestamp')
+                else:
+                    continue
+            except:
+                continue
+
+        if not fecha:
             continue
+
+        # Filtrar por semana actual
+        if inicio_semana.date() <= fecha.date() <= fin_semana.date():
+            datos_semana.append({
+                'fecha': fecha,
+                'dia_semana': fecha.weekday(),  # 0=Lunes, 6=Domingo
+                'horas': horas
+            })
+
+        # Filtrar por mes actual
+        if inicio_mes.date() <= fecha.date() <= fin_mes.date():
+            datos_mes.append({
+                'fecha': fecha,
+                'dia_mes': fecha.day,
+                'horas': horas
+            })
 
     # Calcular estadísticas por día de la semana
     dias_semana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
     estadisticas_semana = []
 
+    # Crear estructura para todos los días, aún sin datos
     for i, dia in enumerate(dias_semana):
+        # Sumar horas para este día de la semana
         horas_dia = sum(dato['horas'] for dato in datos_semana if dato['dia_semana'] == i)
         estadisticas_semana.append({
             'dia': dia,
@@ -788,6 +814,17 @@ def estadisticas(request):
 
     # Calcular total del mes
     total_horas_mes = sum(dato['horas'] for dato in datos_mes)
+    total_horas_mes = round(total_horas_mes, 2)
+
+    return render(request, 'estadisticas.html', {
+        'usuario': usuario,
+        'escritorios': escritorios,
+        'escritorio_seleccionado': escritorio_id,
+        'modo_seleccionado': modo,
+        'estadisticas_semana': estadisticas_semana,
+        'total_horas_mes': total_horas_mes,
+        'mes_actual': hoy.strftime('%B %Y')
+    })
 
     return render(request, 'estadisticas.html', {
         'usuario': usuario,

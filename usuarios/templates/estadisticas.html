@@ -199,19 +199,32 @@
             const bars = document.querySelectorAll('.hours-value');
             let maxValue = 0;
 
+            // Imprimir cuántas barras tenemos
+            console.log("Barras encontradas:", bars.length);
+
             bars.forEach(bar => {
-                const value = parseFloat(bar.getAttribute('data-value'));
+                const value = parseFloat(bar.getAttribute('data-value') || 0);
+                console.log("Valor de barra:", value);
                 if (value > maxValue) maxValue = value;
             });
 
-            // Si el máximo es 0, establecer un valor mínimo para evitar división por cero
+            console.log("Valor máximo encontrado:", maxValue);
+
+            // Si el máximo es 0 o muy pequeño, establecer un valor mínimo para evitar división por cero
             maxValue = maxValue || 1;
 
             // Establecer la altura de cada barra proporcionalmente
             bars.forEach(bar => {
-                const value = parseFloat(bar.getAttribute('data-value'));
+                const value = parseFloat(bar.getAttribute('data-value') || 0);
                 const percent = (value / maxValue) * 100;
-                bar.style.height = Math.max(percent, 5) + '%'; // Al menos 5% para barras muy pequeñas
+                // Asegurar que las barras vacías tengan al menos una altura mínima visible
+                const heightPercent = Math.max(percent, 5);
+                console.log("Altura calculada para barra:", heightPercent + "%");
+                bar.style.height = heightPercent + '%';
+
+                // También ajustar el color según el valor
+                const intensity = Math.min(255, Math.round(200 * (value / maxValue)) + 55);
+                bar.style.backgroundColor = `rgb(${255 - intensity}, ${255 - Math.floor(intensity/2)}, 255)`;
             });
         });
     </script>
